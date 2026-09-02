@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
+    "types": ["@webgpu/types"],
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,

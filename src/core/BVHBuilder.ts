@@ -1,5 +1,6 @@
 import { mortonWgsl } from '../shaders/morton.wgsl';
 import { bvhBuildWgsl } from '../shaders/bvhBuild.wgsl';
+import { radixSortWgsl } from '../shaders/radixSort.wgsl';
 
 export interface BVHOptions {
   debug?: boolean;
@@ -9,55 +10,45 @@ export class BVHBuilder {
   private device: GPUDevice;
   private mortonPipeline: GPUComputePipeline;
   private bvhPipeline: GPUComputePipeline;
+  private radixSortPipeline: GPUComputePipeline;
 
   constructor(device: GPUDevice, private options: BVHOptions = {}) {
     this.device = device;
     this.mortonPipeline = this.createPipeline(mortonWgsl, 'MortonEncoder');
     this.bvhPipeline = this.createPipeline(bvhBuildWgsl, 'BVHConstructor');
+    this.radixSortPipeline = this.createPipeline(radixSortWgsl, 'RadixSort');
   }
 
   private createPipeline(code: string, label: string): GPUComputePipeline {
-    const module = this.device.createShaderModule({ code, label: \`\${label}Module\` });
+    const module = this.device.createShaderModule({ code, label: `${label}Module` });
     return this.device.createComputePipeline({
       layout: 'auto',
       compute: {
         module,
         entryPoint: 'main',
       },
-      label: \`\${label}Pipeline\`
+      label: `${label}Pipeline`
     });
   }
 
-  /**
-   * Orchestrates the Linear Bounding Volume Hierarchy (LBVH) creation.
-   * Runs entirely on the GPU.
-   * 
-   * @param splatCenterBuffer GPUBuffer containing the XYZ center and Radius of each splat.
-   * @param numSplats Total number of splats (e.g., 5,000,000).
-   * @param boundsBuffer GPUBuffer containing the global min/max bounding box.
-   */
   public async buildHierarchy(splatCenterBuffer: GPUBuffer, numSplats: number, boundsBuffer: GPUBuffer): Promise<GPUBuffer> {
     const commandEncoder = this.device.createCommandEncoder({ label: 'LBVH Build Encoder' });
 
-    // 1. Allocate intermediate buffers
     const mortonBuffer = this.device.createBuffer({
-      size: numSplats * 4, // u32
+      size: numSplats * 4,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
     });
     
     const indicesBuffer = this.device.createBuffer({
-      size: numSplats * 4, // u32
+      size: numSplats * 4,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
     });
 
     const bvhNodesBuffer = this.device.createBuffer({
-      // Internal nodes = numSplats - 1. Total nodes = 2n - 1. 
-      // Size: 32 bytes per node (min vec3, max vec3, leftChild u32, rightChild u32)
       size: ((numSplats * 2) - 1) * 32,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
     });
 
-    // 2. Dispatch Morton Encoding Pass
     const mortonBindGroup = this.device.createBindGroup({
       layout: this.mortonPipeline.getBindGroupLayout(0),
       entries: [
@@ -75,10 +66,20 @@ export class BVHBuilder {
     mortonPass.dispatchWorkgroups(workgroups);
     mortonPass.end();
 
-    // 3. TODO: Dispatch Radix Sort Pass (Sorts mortonBuffer & indicesBuffer)
-    // For scaffolding, this assumes an external GPU radix sort implementation is injected here.
+    const radixSortBindGroup = this.device.createBindGroup({
+      layout: this.radixSortPipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: { buffer: mortonBuffer } },
+        { binding: 1, resource: { buffer: indicesBuffer } }
+      ]
+    });
+
+    const sortPass = commandEncoder.beginComputePass({ label: 'Radix Sort Pass' });
+    sortPass.setPipeline(this.radixSortPipeline);
+    sortPass.setBindGroup(0, radixSortBindGroup);
+    sortPass.dispatchWorkgroups(workgroups);
+    sortPass.end();
     
-    // 4. Dispatch LBVH Construction Pass (Karras 2012)
     const bvhBindGroup = this.device.createBindGroup({
       layout: this.bvhPipeline.getBindGroupLayout(0),
       entries: [
@@ -90,13 +91,13 @@ export class BVHBuilder {
     const bvhPass = commandEncoder.beginComputePass({ label: 'BVH Compute Pass' });
     bvhPass.setPipeline(this.bvhPipeline);
     bvhPass.setBindGroup(0, bvhBindGroup);
-    bvhPass.dispatchWorkgroups(workgroups); // n-1 threads actually needed
+    bvhPass.dispatchWorkgroups(workgroups);
     bvhPass.end();
 
     this.device.queue.submit([commandEncoder.finish()]);
     
     if (this.options.debug) {
-      console.log(\`[Splat BVH] Hierarchy constructed for \${numSplats} splats.\`);
+      console.log(`[Splat BVH] Hierarchy constructed for ${numSplats} splats.`);
     }
 
     return bvhNodesBuffer;

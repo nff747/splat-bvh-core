@@ -1,4 +1,4 @@
-export const bvhBuildWgsl = \`
+export const bvhBuildWgsl = `
 struct BVHNode {
     aabbMin: vec3<f32>,
     leftChild: u32,
@@ -64,4 +64,4 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // 5. Output child pointers to BVH Node array
     // (Simplified logic for scaffolding: wires internal node connections)
 }
-\`;
+`;

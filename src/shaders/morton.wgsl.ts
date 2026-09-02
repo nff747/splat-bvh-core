@@ -1,4 +1,4 @@
-export const mortonWgsl = \`
+export const mortonWgsl = `
 struct SceneBounds {
     min: vec3<f32>,
     max: vec3<f32>,
@@ -46,4 +46,4 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     mortonCodes[index] = code;
     splatIndices[index] = index; // Initialize identity mapping for sorting
 }
-\`;
+`;
