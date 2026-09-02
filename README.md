@@ -1,5 +1,8 @@
 <div align="center">
 
+<img src="assets/banner.jpg" width="800" alt="Project Banner">
+
+
 # 🌳 splat-bvh-core
 
 **Real-Time WebGPU Spatial Indexing for 3D Gaussian Splats**
