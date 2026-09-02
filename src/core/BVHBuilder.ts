@@ -34,6 +34,7 @@ export class BVHBuilder {
   public async buildHierarchy(splatCenterBuffer: GPUBuffer, numSplats: number, boundsBuffer: GPUBuffer): Promise<GPUBuffer> {
     const commandEncoder = this.device.createCommandEncoder({ label: 'LBVH Build Encoder' });
 
+    // Exact allocation for arbitrary splat counts - Zero power-of-two padding waste
     const mortonBuffer = this.device.createBuffer({
       size: numSplats * 4,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
@@ -43,6 +44,23 @@ export class BVHBuilder {
       size: numSplats * 4,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
     });
+
+    const mortonOutBuffer = this.device.createBuffer({
+      size: numSplats * 4,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+    });
+
+    const indicesOutBuffer = this.device.createBuffer({
+      size: numSplats * 4,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+    });
+
+    const sortUniformsBuffer = this.device.createBuffer({
+      size: 16, // count (u32), shift (u32), padding
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    });
+
+    this.device.queue.writeBuffer(sortUniformsBuffer, 0, new Uint32Array([numSplats, 0, 0, 0]));
 
     const bvhNodesBuffer = this.device.createBuffer({
       size: ((numSplats * 2) - 1) * 32,
@@ -70,11 +88,14 @@ export class BVHBuilder {
       layout: this.radixSortPipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: { buffer: mortonBuffer } },
-        { binding: 1, resource: { buffer: indicesBuffer } }
+        { binding: 1, resource: { buffer: indicesBuffer } },
+        { binding: 2, resource: { buffer: mortonOutBuffer } },
+        { binding: 3, resource: { buffer: indicesOutBuffer } },
+        { binding: 4, resource: { buffer: sortUniformsBuffer } }
       ]
     });
 
-    const sortPass = commandEncoder.beginComputePass({ label: 'Radix Sort Pass' });
+    const sortPass = commandEncoder.beginComputePass({ label: 'Guarded Radix Sort Pass' });
     sortPass.setPipeline(this.radixSortPipeline);
     sortPass.setBindGroup(0, radixSortBindGroup);
     sortPass.dispatchWorkgroups(workgroups);
@@ -83,7 +104,7 @@ export class BVHBuilder {
     const bvhBindGroup = this.device.createBindGroup({
       layout: this.bvhPipeline.getBindGroupLayout(0),
       entries: [
-        { binding: 0, resource: { buffer: mortonBuffer } },
+        { binding: 0, resource: { buffer: mortonOutBuffer } },
         { binding: 1, resource: { buffer: bvhNodesBuffer } }
       ]
     });
@@ -97,7 +118,7 @@ export class BVHBuilder {
     this.device.queue.submit([commandEncoder.finish()]);
     
     if (this.options.debug) {
-      console.log(`[Splat BVH] Hierarchy constructed for ${numSplats} splats.`);
+      console.log(`[Splat BVH] Hierarchy constructed for ${numSplats} arbitrary splats (Zero Padded VRAM).`);
     }
 
     return bvhNodesBuffer;
