@@ -58,10 +58,33 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // 4. Find the split position using binary search
     let deltaNode = delta(i, j, numSplats);
     var s = 0;
-    t = l / 2;
-    // ... Additional binary search logic for split point 'gamma' ...
+    var splitT = (l + 1) / 2;
+    while (splitT > 0) {
+        if (delta(i, i + (s + splitT) * d, numSplats) > deltaNode) {
+            s = s + splitT;
+        }
+        if (splitT == 1) {
+            break;
+        }
+        splitT = (splitT + 1) / 2;
+    }
+    let gamma = i + s * d + min(d, 0);
     
     // 5. Output child pointers to BVH Node array
-    // (Simplified logic for scaffolding: wires internal node connections)
+    // Leaves are encoded with MSB set (0x80000000u)
+    var leftIdx = u32(gamma);
+    if (min(i, j) == gamma) {
+        leftIdx = leftIdx | 0x80000000u;
+    }
+
+    var rightIdx = u32(gamma + 1);
+    if (max(i, j) == gamma + 1) {
+        rightIdx = rightIdx | 0x80000000u;
+    }
+
+    bvhNodes[u32(i)].leftChild = leftIdx;
+    bvhNodes[u32(i)].rightChild = rightIdx;
+    bvhNodes[u32(i)].aabbMin = vec3<f32>(-1.0, -1.0, -1.0);
+    bvhNodes[u32(i)].aabbMax = vec3<f32>(1.0, 1.0, 1.0);
 }
 `;
