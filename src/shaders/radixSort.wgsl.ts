@@ -1,7 +1,9 @@
 export const radixSortWgsl = `
 struct SortUniforms {
     count: u32,
-    shift: u32, // Bit shift: 0, 4, 8, 12, 16, 20, 24, 28
+    stage: u32,
+    step: u32,
+    direction: u32
 };
 
 @group(0) @binding(0) var<storage, read_write> mortonBuffer: array<u32>;
@@ -10,34 +12,45 @@ struct SortUniforms {
 @group(0) @binding(3) var<storage, read_write> indicesOut: array<u32>;
 @group(0) @binding(4) var<uniform> uniforms: SortUniforms;
 
-var<workgroup> localBuckets: array<atomic<u32>, 16>;
-
 @compute @workgroup_size(256)
-fn main(
-    @builtin(global_invocation_id) global_id: vec3<u32>,
-    @builtin(local_invocation_id) local_id: vec3<u32>
-) {
-    let index = global_id.x;
+fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    let i = global_id.x;
+    let n = uniforms.count;
     
-    // Clear workgroup local histograms
-    if (local_id.x < 16u) {
-        atomicStore(&localBuckets[local_id.x], 0u);
+    if (i >= n) {
+        return;
     }
-    workgroupBarrier();
 
-    // Guarded execution: Strictly mask out elements beyond count (NO power-of-two waste)
-    if (index < uniforms.count) {
-        let code = mortonBuffer[index];
-        let bucket = (code >> uniforms.shift) & 0x0Fu;
-        atomicAdd(&localBuckets[bucket], 1u);
-    }
-    workgroupBarrier();
+    let stage = uniforms.stage;
+    let step = uniforms.step;
 
-    // In-register parallel reorder pass for arbitrary count
-    if (index < uniforms.count) {
-        // Direct Scatter Write
-        mortonOut[index] = mortonBuffer[index];
-        indicesOut[index] = indicesBuffer[index];
+    let pairDist = step;
+    let isLeft = (i & pairDist) == 0u;
+    let partner = select(i - pairDist, i + pairDist, isLeft);
+    let dirAscending = (i & stage) == 0u;
+
+    if (isLeft && partner < n) {
+        let keyA = mortonBuffer[i];
+        let valA = indicesBuffer[i];
+        let keyB = mortonBuffer[partner];
+        let valB = indicesBuffer[partner];
+
+        let shouldSwap = select(keyA < keyB, keyA > keyB, dirAscending);
+
+        if (shouldSwap) {
+            mortonOut[i] = keyB;
+            indicesOut[i] = valB;
+            mortonOut[partner] = keyA;
+            indicesOut[partner] = valA;
+        } else {
+            mortonOut[i] = keyA;
+            indicesOut[i] = valA;
+            mortonOut[partner] = keyB;
+            indicesOut[partner] = valB;
+        }
+    } else if (partner >= n) {
+        mortonOut[i] = mortonBuffer[i];
+        indicesOut[i] = indicesBuffer[i];
     }
 }
 `;

@@ -84,27 +84,61 @@ export class BVHBuilder {
     mortonPass.dispatchWorkgroups(workgroups);
     mortonPass.end();
 
-    const radixSortBindGroup = this.device.createBindGroup({
-      layout: this.radixSortPipeline.getBindGroupLayout(0),
-      entries: [
-        { binding: 0, resource: { buffer: mortonBuffer } },
-        { binding: 1, resource: { buffer: indicesBuffer } },
-        { binding: 2, resource: { buffer: mortonOutBuffer } },
-        { binding: 3, resource: { buffer: indicesOutBuffer } },
-        { binding: 4, resource: { buffer: sortUniformsBuffer } }
-      ]
-    });
+    // Compute next power of two for bitonic sort stages
+    let nextPow2 = 1;
+    while (nextPow2 < numSplats) {
+      nextPow2 <<= 1;
+    }
 
-    const sortPass = commandEncoder.beginComputePass({ label: 'Guarded Radix Sort Pass' });
-    sortPass.setPipeline(this.radixSortPipeline);
-    sortPass.setBindGroup(0, radixSortBindGroup);
-    sortPass.dispatchWorkgroups(workgroups);
-    sortPass.end();
+    // Ping-pong sort buffers
+    let currentInMorton = mortonBuffer;
+    let currentInIndices = indicesBuffer;
+    let currentOutMorton = mortonOutBuffer;
+    let currentOutIndices = indicesOutBuffer;
+
+    for (let stage = 2; stage <= nextPow2; stage <<= 1) {
+      for (let step = stage >> 1; step > 0; step >>= 1) {
+        const uniformsBuffer = this.device.createBuffer({
+          size: 16,
+          usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+        this.device.queue.writeBuffer(uniformsBuffer, 0, new Uint32Array([numSplats, stage, step, 1]));
+
+        const sortBindGroup = this.device.createBindGroup({
+          layout: this.radixSortPipeline.getBindGroupLayout(0),
+          entries: [
+            { binding: 0, resource: { buffer: currentInMorton } },
+            { binding: 1, resource: { buffer: currentInIndices } },
+            { binding: 2, resource: { buffer: currentOutMorton } },
+            { binding: 3, resource: { buffer: currentOutIndices } },
+            { binding: 4, resource: { buffer: uniformsBuffer } }
+          ]
+        });
+
+        const sortPass = commandEncoder.beginComputePass({ label: `Bitonic Sort Pass stage ${stage} step ${step}` });
+        sortPass.setPipeline(this.radixSortPipeline);
+        sortPass.setBindGroup(0, sortBindGroup);
+        sortPass.dispatchWorkgroups(workgroups);
+        sortPass.end();
+
+        // Swap ping-pong buffers
+        const tempM = currentInMorton;
+        currentInMorton = currentOutMorton;
+        currentOutMorton = tempM;
+
+        const tempI = currentInIndices;
+        currentInIndices = currentOutIndices;
+        currentOutIndices = tempI;
+      }
+    }
+    
+    // Ensure final sorted morton buffer is wired into BVH construction
+    const finalSortedMortonBuffer = currentInMorton;
     
     const bvhBindGroup = this.device.createBindGroup({
       layout: this.bvhPipeline.getBindGroupLayout(0),
       entries: [
-        { binding: 0, resource: { buffer: mortonOutBuffer } },
+        { binding: 0, resource: { buffer: finalSortedMortonBuffer } },
         { binding: 1, resource: { buffer: bvhNodesBuffer } }
       ]
     });
