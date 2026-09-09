@@ -24,16 +24,17 @@ License: MIT
 
 ---
 
-## 2. Twitter / X Launch Thread
+## 2. Twitter / X Post (Under 280 chars - no subscription needed)
 ```text
-3D Gaussian Splatting is amazing, but sorting and raycasting 10M splats in WebGL destroys framerates.
+I built splat-bvh-core: Karras 2012 GPU LBVH builder in pure WebGPU (WGSL).
 
-Introducing splat-bvh-core:
-A complete Karras 2012 Linear BVH tree generator running 100% on the GPU in WGSL.
+Spatial queries for 3D Gaussian Splats:
+- Zero CPU readbacks
+- In-VRAM Bitonic Sort
+- Sub-ms tree rebuilds
+- 100% MIT
 
-Zero CPU readbacks. Sub-millisecond rebuilds.
+https://github.com/nff747/splat-bvh-core
 
-Repo: https://github.com/nff747/splat-bvh-core
-
-#webgpu #graphics #3dgs #gaussian #threejs
+#webgpu #threejs #gamedev
 ```
