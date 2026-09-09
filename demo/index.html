@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splat BVH Core Demo</title>
+    <style>
+        body { margin: 0; background: #111; color: #fff; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; }
+        #log { background: #222; padding: 20px; border-radius: 8px; max-width: 800px; width: 100%; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>splat-bvh-core WebGPU Demo</h1>
+    <div id="log">Initializing WebGPU...</div>
+    <script type="module">
+        // Import our built library (make sure to run `npm run build` or `npm run dev`)
+        // import { BVHBuilder } from '../dist/index.js';
+        
+        async function run() {
+            const logEl = document.getElementById('log');
+            const log = (msg) => { logEl.textContent += '\n' + msg; };
+
+            if (!navigator.gpu) {
+                log("WebGPU is not supported on this browser.");
+                return;
+            }
+
+            const adapter = await navigator.gpu.requestAdapter();
+            if (!adapter) {
+                log("Failed to request WebGPU adapter.");
+                return;
+            }
+            const device = await adapter.requestDevice();
+            log("WebGPU device initialized successfully.");
+
+            // In a real app, you'd load splat data. We'll just mock the buffer sizes here.
+            log("Ready to build BVH for massive splat scenes!");
+        }
+        run();
+    </script>
+</body>
+</html>
