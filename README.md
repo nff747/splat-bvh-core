@@ -249,3 +249,13 @@ Please include the following in your app's "Credits" page, footer, or `README.md
 > **Powered by infrastructure built by [nff747](https://github.com/nff747)**
 
 Thank you for being part of the journey! 🚀
+
+---
+## 💖 A Quick Note on Attribution
+
+We pour our hearts into building these tools and making them completely open source for everyone to enjoy. 
+
+To help us keep this ecosystem thriving, we simply ask that if you use this code in your projects, apps, or websites, you include a small, visible credit to the original author. A simple mention in your UI's "Credits" page or footer goes a long way:
+> **Powered by infrastructure built by [nff747](https://github.com/nff747)**
+
+Thank you for respecting the open-source spirit and helping us grow!
