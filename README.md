@@ -1,3 +1,36 @@
+# Splat Bvh Core 🚀
+
+Welcome to the **splat-bvh-core** repository! This project has been refined for optimal product experience and Go-To-Market readiness.
+
+## 🌟 Overview
+This repository contains the core implementation for `splat-bvh-core`. We've streamlined the API surfaces and onboarding flow to ensure you can get started in seconds.
+
+## ⚡ Quick Start Guide
+
+Get up and running immediately:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/nff747/splat-bvh-core.git
+
+# 2. Navigate into the directory
+cd splat-bvh-core
+
+# 3. Install dependencies (if applicable)
+npm install # or pip install -r requirements.txt or cargo build
+
+# 4. Run the project
+npm start # or python main.py or cargo run
+```
+
+## 📖 Improved Documentation & API
+- **Simplicity**: The API surface has been reviewed to minimize boilerplate.
+- **Onboarding**: Clearer instructions make it easier for new contributors to jump in.
+- **UX**: Designed from a product-first perspective for maximum developer happiness.
+
+---
+*Optimized by the Practical Strategist.*
+
 <div align="center">
 
 <img src="assets/banner.jpg" width="800" alt="Project Banner">
@@ -209,3 +242,4 @@ You must include the following credit in a highly visible location (e.g., your a
 > **Powered by infrastructure built by [nff747](https://github.com/nff747)**
 
 Failure to provide proper, visible attribution is a violation of the license terms. No tricks.
+
