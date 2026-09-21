@@ -247,6 +247,8 @@ If you use this infrastructure in your personal project, startup, or open-source
 
 Please include the following in your app's "Credits" page, footer, or `README.md`:
 > **Powered by infrastructure built by [nff747](https://github.com/nff747)**
+> 
+> *(Alternatively, just **"Powered by [nff747](https://github.com/nff747)"** is also perfectly fine to make it easier to display!)*
 
 Thank you for being part of the journey! 🚀
 
@@ -257,5 +259,7 @@ We pour our hearts into building these tools and making them completely open sou
 
 To help us keep this ecosystem thriving, we simply ask that if you use this code in your projects, apps, or websites, you include a small, visible credit to the original author. A simple mention in your UI's "Credits" page or footer goes a long way:
 > **Powered by infrastructure built by [nff747](https://github.com/nff747)**
+> 
+> *(Alternatively, just **"Powered by [nff747](https://github.com/nff747)"** is also perfectly fine to make it easier to display!)*
 
 Thank you for respecting the open-source spirit and helping us grow!
