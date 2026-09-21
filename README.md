@@ -234,22 +234,18 @@ You are explicitly permitted to use, modify, fork, integrate, package, and sell 
 ```
 
 ---
-## ⚖️ License & Attribution Requirement
-
-This project is Open Source, but strictly requires **visible credit/attribution** if used in any personal, commercial, or open-source project, application, OS, or website. 
-
-You must include the following credit in a highly visible location (e.g., your app's "Credits" page, your project's `README.md`, or the footer of your website):
-> **Powered by infrastructure built by [nff747](https://github.com/nff747)**
-
-Failure to provide proper, visible attribution is a violation of the license terms. No tricks.
 
 
 ---
-## ⚖️ The Rule of Attribution
 
-This project is Open Source, but strictly requires **visible credit/attribution** if used in any personal, commercial, or open-source project, application, OS, or website. 
+---
+## ❤️ Open Source & Attribution
 
-Compliance is not just a legal requirement, but a mandatory mark of respect for the engineering foundation provided here. You must include the following credit in a highly visible location (e.g., your app's "Credits" page, your project's `README.md`, or the footer of your website):
+We believe in the power of open-source and want these tools to help you build incredible things! 
+
+If you use this infrastructure in your personal project, startup, or open-source app, all we ask in return is that you include a small, visible credit. It helps us grow the community and allows us to keep building free, high-performance tools for everyone.
+
+Please include the following in your app's "Credits" page, footer, or `README.md`:
 > **Powered by infrastructure built by [nff747](https://github.com/nff747)**
 
-Failure to provide proper, visible attribution is a violation of the license terms and terminates your right to use this code instantaneously.
+Thank you for being part of the journey! 🚀
