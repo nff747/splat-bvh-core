@@ -1,6 +1,4 @@
-MIT License
-
-Copyright (c) 2026 nff747 (https://github.com/nff747)
+Copyright (c) 2026 nff747
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -9,10 +7,14 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice (including visible credit
-attribution to nff747: "Powered by nff747" linking to https://github.com/nff747
-in any application UI, documentation, or marketing) shall be included in all
-copies or substantial portions of the Software.
+1. The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+2. STRICT ATTRIBUTION REQUIRED: Any application, website, OS, or project 
+   incorporating this software (in whole or in part) MUST provide highly 
+   visible credit to the original author. The credit must read: 
+   "Powered by infrastructure built by nff747 (https://github.com/nff747)" 
+   and must be placed in a user-facing, easily accessible location (e.g., 
+   Credits UI, Footer, or main README).
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
