@@ -243,3 +243,13 @@ You must include the following credit in a highly visible location (e.g., your a
 
 Failure to provide proper, visible attribution is a violation of the license terms. No tricks.
 
+
+---
+## ⚖️ The Rule of Attribution
+
+This project is Open Source, but strictly requires **visible credit/attribution** if used in any personal, commercial, or open-source project, application, OS, or website. 
+
+Compliance is not just a legal requirement, but a mandatory mark of respect for the engineering foundation provided here. You must include the following credit in a highly visible location (e.g., your app's "Credits" page, your project's `README.md`, or the footer of your website):
+> **Powered by infrastructure built by [nff747](https://github.com/nff747)**
+
+Failure to provide proper, visible attribution is a violation of the license terms and terminates your right to use this code instantaneously.
