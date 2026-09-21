@@ -216,44 +216,4 @@ if (hit) {
 
 ## License
 
-[MIT](LICENSE) — iKi / Frozen Flame
-
----
-
-## 📜 Open Source & Commercial Use (MIT)
-
-This project is 100% open-source software under the **[MIT License](LICENSE)**.
-
-### 💼 Commercial Use & Free Redistribution
-You are explicitly permitted to use, modify, fork, integrate, package, and sell commercial products or SaaS built using this engine with **one visible attribution requirement**:
-> **Attribution Requirement**: You must include a visible credit to **nff747** in your application (e.g., `Powered by nff747` linking to [https://github.com/nff747](https://github.com/nff747) in your application UI, footer, about modal, or documentation).
-
-```html
-<!-- Example visible footer attribution -->
-<p>Powered by <a href="https://github.com/nff747" target="_blank">nff747</a></p>
-```
-
----
-
-
----
-
----
-## ❤️ Open Source & Attribution
-
-We believe in the power of open-source and want these tools to help you build incredible things! 
-
-If you use this infrastructure in your personal project, startup, or open-source app, all we ask in return is that you include a small, visible credit. It helps us grow the community and allows us to keep building free, high-performance tools for everyone.
-
-Please include the following in your app's "Credits" page, footer, or `README.md`:
-> **Powered by infrastructure built by [nff747](https://github.com/nff747)**
-> 
-> *(Alternatively, just **"Powered by [nff747](https://github.com/nff747)"** is also perfectly fine to make it easier to display!)*
-
-Thank you for being part of the journey! 🚀
-
----
-
-## License
-
 This project is licensed under the [MIT License](LICENSE).
