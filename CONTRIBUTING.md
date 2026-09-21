@@ -1,7 +1,11 @@
-# 🌱 Welcome! We're so glad you're here.
+# Contributing
 
-Thank you so much for your interest in contributing! We believe that open source should be a deeply rewarding, mentally pleasing, and joyful experience. 
+Contributions are welcome.
 
-Whether you are fixing a typo, optimizing a complex WebGPU shader, or completely rewriting an API to be more intuitive, your work is valued here. Our goal is to create software that feels effortless to use and maintain. 
+### Standards
+- **Zero-Dependency First**: Avoid adding external runtime dependencies unless fundamentally required.
+- **Performance**: Profile hot paths and allocations before submitting PRs.
+- **Tests**: Provide deterministic unit tests demonstrating correctness.
+- **Code Quality**: Keep code modular, strictly typed, and idiomatic.
 
-We welcome everyone with open arms (provided there are no ill intentions). Dive in, have fun, and let's build something beautiful together!
+Submit PRs with clear architectural rationale and benchmark results where applicable.
