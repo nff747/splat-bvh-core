@@ -1,0 +1,21 @@
+name: Feature Request
+description: Propose an architectural improvement or new feature
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Please adhere to our zero-dependency, zero-overhead engineering standards.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      description: What bottleneck or limitation does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Architecture
+      description: Describe the design, memory/compute footprint, and rationale.
+    validations:
+      required: true
