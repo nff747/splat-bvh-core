@@ -133,3 +133,14 @@ impl BVH {
 fn main() {
     println!("BVH Builder for Splats");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_point() {
+        let p = Point::new(1.0, 2.0, 3.0);
+        assert_eq!(p.x, 1.0);
+    }
+}
