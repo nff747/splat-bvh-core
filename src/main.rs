@@ -28,6 +28,30 @@ impl AABB {
     pub fn new(min: Point, max: Point) -> Self {
         Self { min, max }
     }
+
+    pub fn expand(&mut self, p: &Point) {
+        self.min.x = self.min.x.min(p.x);
+        self.min.y = self.min.y.min(p.y);
+        self.min.z = self.min.z.min(p.z);
+        self.max.x = self.max.x.max(p.x);
+        self.max.y = self.max.y.max(p.y);
+        self.max.z = self.max.z.max(p.z);
+    }
+
+    pub fn merge(&self, other: &AABB) -> AABB {
+        AABB {
+            min: Point::new(
+                self.min.x.min(other.min.x),
+                self.min.y.min(other.min.y),
+                self.min.z.min(other.min.z),
+            ),
+            max: Point::new(
+                self.max.x.max(other.max.x),
+                self.max.y.max(other.max.y),
+                self.max.z.max(other.max.z),
+            ),
+        }
+    }
 }
 
 fn main() {
