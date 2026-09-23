@@ -75,15 +75,41 @@ impl BVHNode {
         }
     }
 
-    pub fn build(points: Vec<Point>) -> Self {
+    pub fn build(mut points: Vec<Point>) -> Self {
         let mut bounds = AABB::empty();
         for p in &points {
             bounds.expand(p);
         }
         
-        BVHNode::Leaf {
+        if points.len() <= 4 {
+            return BVHNode::Leaf { bounds, points };
+        }
+
+        let dx = bounds.max.x - bounds.min.x;
+        let dy = bounds.max.y - bounds.min.y;
+        let dz = bounds.max.z - bounds.min.z;
+
+        let mut axis = 0;
+        if dy > dx && dy > dz { axis = 1; }
+        if dz > dx && dz > dy { axis = 2; }
+
+        points.sort_by(|a, b| {
+            let va = match axis { 0 => a.x, 1 => a.y, _ => a.z };
+            let vb = match axis { 0 => b.x, 1 => b.y, _ => b.z };
+            va.partial_cmp(&vb).unwrap()
+        });
+
+        let mid = points.len() / 2;
+        let right_points = points.split_off(mid);
+        let left_points = points;
+
+        let left = Box::new(BVHNode::build(left_points));
+        let right = Box::new(BVHNode::build(right_points));
+
+        BVHNode::Inner {
             bounds,
-            points,
+            left,
+            right,
         }
     }
 }
