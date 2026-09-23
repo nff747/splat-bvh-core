@@ -17,6 +17,19 @@ pub struct AABB {
     pub max: Point,
 }
 
+impl AABB {
+    pub fn empty() -> Self {
+        Self {
+            min: Point::new(f32::INFINITY, f32::INFINITY, f32::INFINITY),
+            max: Point::new(f32::NEG_INFINITY, f32::NEG_INFINITY, f32::NEG_INFINITY),
+        }
+    }
+
+    pub fn new(min: Point, max: Point) -> Self {
+        Self { min, max }
+    }
+}
+
 fn main() {
     println!("BVH Builder for Splats");
 }
