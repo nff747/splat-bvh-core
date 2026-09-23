@@ -152,4 +152,17 @@ mod tests {
         assert_eq!(aabb.min.x, 0.0);
         assert_eq!(aabb.max.x, 1.0);
     }
+
+    #[test]
+    fn test_bvh() {
+        let points = vec![
+            Point::new(0.0, 0.0, 0.0),
+            Point::new(1.0, 1.0, 1.0),
+            Point::new(2.0, 2.0, 2.0),
+            Point::new(3.0, 3.0, 3.0),
+            Point::new(4.0, 4.0, 4.0),
+        ];
+        let bvh = BVH::new(points);
+        assert!(bvh.root.is_some());
+    }
 }
