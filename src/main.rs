@@ -11,6 +11,12 @@ impl Point {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AABB {
+    pub min: Point,
+    pub max: Point,
+}
+
 fn main() {
     println!("BVH Builder for Splats");
 }
