@@ -74,6 +74,18 @@ impl BVHNode {
             BVHNode::Inner { bounds, .. } => *bounds,
         }
     }
+
+    pub fn build(points: Vec<Point>) -> Self {
+        let mut bounds = AABB::empty();
+        for p in &points {
+            bounds.expand(p);
+        }
+        
+        BVHNode::Leaf {
+            bounds,
+            points,
+        }
+    }
 }
 
 fn main() {
