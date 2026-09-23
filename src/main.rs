@@ -54,6 +54,19 @@ impl AABB {
     }
 }
 
+#[derive(Debug)]
+pub enum BVHNode {
+    Leaf {
+        bounds: AABB,
+        points: Vec<Point>,
+    },
+    Inner {
+        bounds: AABB,
+        left: Box<BVHNode>,
+        right: Box<BVHNode>,
+    },
+}
+
 fn main() {
     println!("BVH Builder for Splats");
 }
