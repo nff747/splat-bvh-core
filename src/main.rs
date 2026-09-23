@@ -143,4 +143,13 @@ mod tests {
         let p = Point::new(1.0, 2.0, 3.0);
         assert_eq!(p.x, 1.0);
     }
+
+    #[test]
+    fn test_aabb() {
+        let mut aabb = AABB::empty();
+        aabb.expand(&Point::new(0.0, 0.0, 0.0));
+        aabb.expand(&Point::new(1.0, 1.0, 1.0));
+        assert_eq!(aabb.min.x, 0.0);
+        assert_eq!(aabb.max.x, 1.0);
+    }
 }
