@@ -162,6 +162,17 @@ mod tests {
     }
 
     #[test]
+    fn test_aabb_center() {
+        let mut aabb = AABB::empty();
+        aabb.expand(&Point::new(0.0, 0.0, 0.0));
+        aabb.expand(&Point::new(2.0, 2.0, 2.0));
+        let center = aabb.center();
+        assert_eq!(center.x, 1.0);
+        assert_eq!(center.y, 1.0);
+        assert_eq!(center.z, 1.0);
+    }
+
+    #[test]
     fn test_bvh() {
         let points = vec![
             Point::new(0.0, 0.0, 0.0),
