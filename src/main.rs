@@ -114,6 +114,22 @@ impl BVHNode {
     }
 }
 
+pub struct BVH {
+    pub root: Option<BVHNode>,
+}
+
+impl BVH {
+    pub fn new(points: Vec<Point>) -> Self {
+        if points.is_empty() {
+            Self { root: None }
+        } else {
+            Self {
+                root: Some(BVHNode::build(points)),
+            }
+        }
+    }
+}
+
 fn main() {
     println!("BVH Builder for Splats");
 }
