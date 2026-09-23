@@ -52,6 +52,14 @@ impl AABB {
             ),
         }
     }
+
+    pub fn center(&self) -> Point {
+        Point::new(
+            (self.min.x + self.max.x) * 0.5,
+            (self.min.y + self.max.y) * 0.5,
+            (self.min.z + self.max.z) * 0.5,
+        )
+    }
 }
 
 #[derive(Debug)]
