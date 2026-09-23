@@ -67,6 +67,15 @@ pub enum BVHNode {
     },
 }
 
+impl BVHNode {
+    pub fn bounds(&self) -> AABB {
+        match self {
+            BVHNode::Leaf { bounds, .. } => *bounds,
+            BVHNode::Inner { bounds, .. } => *bounds,
+        }
+    }
+}
+
 fn main() {
     println!("BVH Builder for Splats");
 }
