@@ -83,6 +83,10 @@ impl BVHNode {
         }
     }
 
+    pub fn is_leaf(&self) -> bool {
+        matches!(self, BVHNode::Leaf { .. })
+    }
+
     pub fn build(mut points: Vec<Point>) -> Self {
         let mut bounds = AABB::empty();
         for p in &points {
