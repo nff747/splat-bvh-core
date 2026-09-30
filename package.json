@@ -35,7 +35,7 @@
     "3d",
     "morton-code"
   ],
-  "author": "iKi <nff747@users.noreply.github.com>",
+  "author": "nff747 <nff747@users.noreply.github.com>",
   "license": "MIT",
   "devDependencies": {
     "@webgpu/types": "^0.1.72",
