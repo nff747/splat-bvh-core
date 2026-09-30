@@ -5,5 +5,7 @@ edition = "2024"
 license = "MIT"
 authors = ["nff747 <nff747@users.noreply.github.com>"]
 description = "WebGPU-accelerated parallel Radix Sort and Linear BVH (LBVH) generator for 3D Gaussian Splats."
+repository = "https://github.com/nff747/splat-bvh-core"
+readme = "README.md"
 
 [dependencies]
