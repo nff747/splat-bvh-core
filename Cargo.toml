@@ -2,7 +2,7 @@
 name = "splat-bvh-core"
 version = "0.1.0"
 edition = "2024"
-license = "MIT"
+license = "Apache-2.0"
 authors = ["nff747 <nff747@users.noreply.github.com>"]
 description = "WebGPU-accelerated parallel Radix Sort and Linear BVH (LBVH) generator for 3D Gaussian Splats."
 repository = "https://github.com/nff747/splat-bvh-core"

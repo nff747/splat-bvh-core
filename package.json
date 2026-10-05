@@ -36,7 +36,7 @@
     "morton-code"
   ],
   "author": "nff747 <nff747@users.noreply.github.com>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@webgpu/types": "^0.1.72",
     "tsup": "^8.3.0",
