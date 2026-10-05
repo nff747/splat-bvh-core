@@ -1,71 +1,79 @@
-import { mortonWgsl } from '../shaders/morton.wgsl';
-import { bvhBuildWgsl } from '../shaders/bvhBuild.wgsl';
-import { radixSortWgsl } from '../shaders/radixSort.wgsl';
-
-export interface BVHOptions {
-  debug?: boolean;
-}
+import { BVHOptions, BVHNode } from './types';
+import { mortonShader } from '../shaders/morton.wgsl';
+import { radixSortShader } from '../shaders/radixSort.wgsl';
+import { bvhBuildShader } from '../shaders/bvhBuild.wgsl';
+import { SplatRaycaster, Ray, RaycastHit } from '../raycast/SplatRaycaster';
 
 export class BVHBuilder {
   private device: GPUDevice;
-  private mortonPipeline: GPUComputePipeline;
-  private bvhPipeline: GPUComputePipeline;
-  private radixSortPipeline: GPUComputePipeline;
+  private mortonPipeline!: GPUComputePipeline;
+  private radixSortPipeline!: GPUComputePipeline;
+  private bvhPipeline!: GPUComputePipeline;
+  private raycaster: SplatRaycaster;
 
   constructor(device: GPUDevice, private options: BVHOptions = {}) {
     this.device = device;
-    this.mortonPipeline = this.createPipeline(mortonWgsl, 'MortonEncoder');
-    this.bvhPipeline = this.createPipeline(bvhBuildWgsl, 'BVHConstructor');
-    this.radixSortPipeline = this.createPipeline(radixSortWgsl, 'RadixSort');
+    this.raycaster = new SplatRaycaster(device);
+    this.initPipelines();
   }
 
-  private createPipeline(code: string, label: string): GPUComputePipeline {
-    const module = this.device.createShaderModule({ code, label: `${label}Module` });
-    return this.device.createComputePipeline({
+  private initPipelines(): void {
+    this.mortonPipeline = this.device.createComputePipeline({
+      label: 'Morton Code Generator Pipeline',
       layout: 'auto',
       compute: {
-        module,
-        entryPoint: 'main',
-      },
-      label: `${label}Pipeline`
+        module: this.device.createShaderModule({ code: mortonShader }),
+        entryPoint: 'main'
+      }
+    });
+
+    this.radixSortPipeline = this.device.createComputePipeline({
+      label: 'Bitonic Radix Sort Pipeline',
+      layout: 'auto',
+      compute: {
+        module: this.device.createShaderModule({ code: radixSortShader }),
+        entryPoint: 'main'
+      }
+    });
+
+    this.bvhPipeline = this.device.createComputePipeline({
+      label: 'Radix Tree BVH Construction Pipeline',
+      layout: 'auto',
+      compute: {
+        module: this.device.createShaderModule({ code: bvhBuildShader }),
+        entryPoint: 'main'
+      }
     });
   }
 
   public async buildHierarchy(splatCenterBuffer: GPUBuffer, numSplats: number, boundsBuffer: GPUBuffer): Promise<GPUBuffer> {
-    const commandEncoder = this.device.createCommandEncoder({ label: 'LBVH Build Encoder' });
-
-    // Exact allocation for arbitrary splat counts - Zero power-of-two padding waste
     const mortonBuffer = this.device.createBuffer({
       size: numSplats * 4,
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
     });
-    
+
     const indicesBuffer = this.device.createBuffer({
       size: numSplats * 4,
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
     });
 
     const mortonOutBuffer = this.device.createBuffer({
       size: numSplats * 4,
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
     });
 
     const indicesOutBuffer = this.device.createBuffer({
       size: numSplats * 4,
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
-    });
-
-    const sortUniformsBuffer = this.device.createBuffer({
-      size: 16, // count (u32), shift (u32), padding
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    });
-
-    this.device.queue.writeBuffer(sortUniformsBuffer, 0, new Uint32Array([numSplats, 0, 0, 0]));
-
-    const bvhNodesBuffer = this.device.createBuffer({
-      size: ((numSplats * 2) - 1) * 32,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
     });
+
+    const numInternalNodes = numSplats - 1;
+    const bvhNodesBuffer = this.device.createBuffer({
+      size: numInternalNodes * 32,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+    });
+
+    const commandEncoder = this.device.createCommandEncoder();
 
     const mortonBindGroup = this.device.createBindGroup({
       layout: this.mortonPipeline.getBindGroupLayout(0),
@@ -84,25 +92,24 @@ export class BVHBuilder {
     mortonPass.dispatchWorkgroups(workgroups);
     mortonPass.end();
 
-    // Compute next power of two for bitonic sort stages
     let nextPow2 = 1;
     while (nextPow2 < numSplats) {
       nextPow2 <<= 1;
     }
 
-    // Ping-pong sort buffers
     let currentInMorton = mortonBuffer;
     let currentInIndices = indicesBuffer;
     let currentOutMorton = mortonOutBuffer;
     let currentOutIndices = indicesOutBuffer;
 
+    const stepUniformsBuffer = this.device.createBuffer({
+      size: 16,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    });
+
     for (let stage = 2; stage <= nextPow2; stage <<= 1) {
       for (let step = stage >> 1; step > 0; step >>= 1) {
-        const uniformsBuffer = this.device.createBuffer({
-          size: 16,
-          usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
-        this.device.queue.writeBuffer(uniformsBuffer, 0, new Uint32Array([numSplats, stage, step, 1]));
+        this.device.queue.writeBuffer(stepUniformsBuffer, 0, new Uint32Array([numSplats, stage, step, 1]));
 
         const sortBindGroup = this.device.createBindGroup({
           layout: this.radixSortPipeline.getBindGroupLayout(0),
@@ -111,7 +118,7 @@ export class BVHBuilder {
             { binding: 1, resource: { buffer: currentInIndices } },
             { binding: 2, resource: { buffer: currentOutMorton } },
             { binding: 3, resource: { buffer: currentOutIndices } },
-            { binding: 4, resource: { buffer: uniformsBuffer } }
+            { binding: 4, resource: { buffer: stepUniformsBuffer } }
           ]
         });
 
@@ -121,7 +128,6 @@ export class BVHBuilder {
         sortPass.dispatchWorkgroups(workgroups);
         sortPass.end();
 
-        // Swap ping-pong buffers
         const tempM = currentInMorton;
         currentInMorton = currentOutMorton;
         currentOutMorton = tempM;
@@ -132,7 +138,6 @@ export class BVHBuilder {
       }
     }
     
-    // Ensure final sorted morton buffer is wired into BVH construction
     const finalSortedMortonBuffer = currentInMorton;
     
     const bvhBindGroup = this.device.createBindGroup({
@@ -150,11 +155,18 @@ export class BVHBuilder {
     bvhPass.end();
 
     this.device.queue.submit([commandEncoder.finish()]);
-    
-    if (this.options.debug) {
-      console.log(`[Splat BVH] Hierarchy constructed for ${numSplats} arbitrary splats (Zero Padded VRAM).`);
-    }
 
+    if (typeof (this.device.queue as any).onSubmittedWorkDone === 'function') {
+      await (this.device.queue as any).onSubmittedWorkDone();
+    }
+    
+    // Safely cleanup temporary GPU buffers without throwing ReferenceError
+    mortonBuffer?.destroy?.();
+    indicesBuffer?.destroy?.();
+    mortonOutBuffer?.destroy?.();
+    indicesOutBuffer?.destroy?.();
+    stepUniformsBuffer?.destroy?.();
+    
     return bvhNodesBuffer;
   }
 
@@ -162,15 +174,35 @@ export class BVHBuilder {
     return this.buildHierarchy(splats.centerBuffer, splats.count, splats.boundsBuffer);
   }
 
-  public async query(ray: { origin: Float32Array; direction: Float32Array }): Promise<any> {
-    // Scaffold: would typically call a raycaster instance
-    console.log('[Splat BVH] Querying BVH with ray...');
-    return null;
+  public async query(ray: Ray, splatPositions?: Float32Array): Promise<RaycastHit | null> {
+    return this.raycaster.intersectRay(ray, splatPositions);
   }
 
-  public async frustumCull(camera: { projectionMatrix: Float32Array; viewMatrix: Float32Array }): Promise<Uint32Array> {
-    // Scaffold: would return array of visible splat indices
-    console.log('[Splat BVH] Frustum culling splats...');
-    return new Uint32Array();
+  public async frustumCull(
+    camera: { projectionMatrix: Float32Array; viewMatrix: Float32Array },
+    splatPositions?: Float32Array
+  ): Promise<Uint32Array> {
+    if (!splatPositions || splatPositions.length === 0) {
+      return new Uint32Array(0);
+    }
+    const numSplats = splatPositions.length / 3;
+    const visible: number[] = [];
+
+    // Simple bounding sphere test in view-space
+    for (let i = 0; i < numSplats; i++) {
+      const x = splatPositions[i * 3];
+      const y = splatPositions[i * 3 + 1];
+      const z = splatPositions[i * 3 + 2];
+      
+      // Transform by viewMatrix (assuming row-major 4x4)
+      const vz = camera.viewMatrix[2] * x + camera.viewMatrix[6] * y + camera.viewMatrix[10] * z + camera.viewMatrix[14];
+      
+      // Near and far plane test
+      if (vz < 0.1 && vz > -1000.0) {
+        visible.push(i);
+      }
+    }
+
+    return new Uint32Array(visible);
   }
 }
