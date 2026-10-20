@@ -10,3 +10,7 @@ export interface BVHNode {
   isLeaf: boolean;
   splatIndex: number;
 }
+
+export interface BVHOptions {
+  debug?: boolean;
+}

@@ -47,3 +47,5 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     splatIndices[index] = index; // Initialize identity mapping for sorting
 }
 `;
+
+export const mortonShader = mortonWgsl;

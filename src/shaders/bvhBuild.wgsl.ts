@@ -88,3 +88,5 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     bvhNodes[u32(i)].aabbMax = vec3<f32>(1.0, 1.0, 1.0);
 }
 `;
+
+export const bvhBuildShader = bvhBuildWgsl;
