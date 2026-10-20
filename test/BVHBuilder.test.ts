@@ -75,4 +75,16 @@ describe('BVHBuilder', () => {
     expect(hit?.splatIndex).toBe(0);
     expect(hit?.distance).toBeCloseTo(4.5);
   });
+
+  it('throws RangeError for invalid splat counts', async () => {
+    const builder = new BVHBuilder(mockDevice);
+    await expect(builder.buildHierarchy(mockBuffer as any, 0, mockBuffer as any)).rejects.toThrow(RangeError);
+    await expect(builder.buildHierarchy(mockBuffer as any, -10, mockBuffer as any)).rejects.toThrow(RangeError);
+    await expect(builder.buildHierarchy(mockBuffer as any, 10.5, mockBuffer as any)).rejects.toThrow(RangeError);
+  });
+
+  it('safely handles destroy() without throwing', () => {
+    const builder = new BVHBuilder(mockDevice);
+    expect(() => builder.destroy()).not.toThrow();
+  });
 });
