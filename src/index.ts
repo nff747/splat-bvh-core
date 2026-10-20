@@ -3,3 +3,4 @@ export type { AABB, BVHNode, BVHOptions } from './core/types';
 export { SplatRaycaster } from './raycast/SplatRaycaster';
 export type { Ray, RaycastHit } from './raycast/SplatRaycaster';
 export { expandBits, calculateMortonCode } from './core/morton';
+export { computeBVHMetrics, type BVHMetrics } from './core/metrics';
