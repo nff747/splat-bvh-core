@@ -24,7 +24,16 @@ export class SplatRaycaster {
     let tmax = Infinity;
 
     for (let i = 0; i < 3; i++) {
-      const invD = 1.0 / (ray.direction[i] || 1e-8);
+      const dir = ray.direction[i];
+      if (Math.abs(dir) < 1e-8) {
+        // Ray is parallel to slab; if origin is outside slab bounds, no intersection
+        if (ray.origin[i] < boxMin[i] || ray.origin[i] > boxMax[i]) {
+          return null;
+        }
+        continue;
+      }
+
+      const invD = 1.0 / dir;
       let t0 = (boxMin[i] - ray.origin[i]) * invD;
       let t1 = (boxMax[i] - ray.origin[i]) * invD;
 
