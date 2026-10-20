@@ -84,4 +84,10 @@ export class SplatRaycaster {
       position: hitPos
     };
   }
+
+  public destroy(): void {
+    if (this.bvhBuffer && typeof this.bvhBuffer.destroy === 'function') {
+      this.bvhBuffer.destroy();
+    }
+  }
 }

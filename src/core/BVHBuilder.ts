@@ -47,6 +47,10 @@ export class BVHBuilder {
   }
 
   public async buildHierarchy(splatCenterBuffer: GPUBuffer, numSplats: number, boundsBuffer: GPUBuffer): Promise<GPUBuffer> {
+    if (!Number.isInteger(numSplats) || numSplats <= 0) {
+      throw new RangeError(`Invalid splat count: ${numSplats}. Expected positive integer.`);
+    }
+
     const mortonBuffer = this.device.createBuffer({
       size: numSplats * 4,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
@@ -204,5 +208,9 @@ export class BVHBuilder {
     }
 
     return new Uint32Array(visible);
+  }
+
+  public destroy(): void {
+    this.raycaster?.destroy?.();
   }
 }
