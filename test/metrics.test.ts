@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeBVHMetrics } from '../src/core/metrics';
+import { computeBVHMetrics, computeAABBSurfaceArea, computeSAHCost } from '../src/core/metrics';
 
 describe('BVH Tree Metrics', () => {
   it('computes metrics for 1024 splats', () => {
@@ -34,5 +34,23 @@ describe('BVH Tree Metrics', () => {
     expect(computeBVHMetrics(0).totalNodes).toBe(0);
     expect(computeBVHMetrics(-100).bufferSizeBytes).toBe(0);
     expect(computeBVHMetrics(NaN as any).totalNodes).toBe(0);
+  });
+
+  it('computes AABB surface area and SAH partition cost', () => {
+    // 2x2x2 box -> surface area = 2 * (4 + 4 + 4) = 24
+    const parentSA = computeAABBSurfaceArea([-1, -1, -1], [1, 1, 1]);
+    expect(parentSA).toBe(24.0);
+
+    // Left child 1x2x2 -> SA = 2 * (2 + 4 + 2) = 16
+    const leftSA = computeAABBSurfaceArea([-1, -1, -1], [0, 1, 1]);
+    expect(leftSA).toBe(16.0);
+
+    // Right child 1x2x2 -> SA = 16
+    const rightSA = computeAABBSurfaceArea([0, -1, -1], [1, 1, 1]);
+    expect(rightSA).toBe(16.0);
+
+    // SAH cost = 1.0 + (16/24 * 10 * 1.5 + 16/24 * 10 * 1.5) = 1.0 + (10 + 10) = 21.0
+    const cost = computeSAHCost(parentSA, leftSA, rightSA, 10, 10, 1.0, 1.5);
+    expect(cost).toBeCloseTo(21.0, 5);
   });
 });
