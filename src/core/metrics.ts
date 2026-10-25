@@ -34,3 +34,35 @@ export function computeBVHMetrics(numSplats: number): BVHMetrics {
     bufferSizeBytes: totalNodes * nodeSizeBytes
   };
 }
+
+/**
+ * Calculates surface area of an Axis-Aligned Bounding Box (AABB).
+ * SA = 2 * (dx*dy + dy*dz + dz*dx)
+ */
+export function computeAABBSurfaceArea(min: [number, number, number], max: [number, number, number]): number {
+  const dx = Math.max(0, max[0] - min[0]);
+  const dy = Math.max(0, max[1] - min[1]);
+  const dz = Math.max(0, max[2] - min[2]);
+  return 2.0 * (dx * dy + dy * dz + dz * dx);
+}
+
+/**
+ * Computes Surface Area Heuristic (SAH) cost for a binary partition split.
+ * Cost = C_traverse + (SA_L / SA_P) * N_L * C_intersect + (SA_R / SA_P) * N_R * C_intersect
+ */
+export function computeSAHCost(
+  parentSA: number,
+  leftSA: number,
+  rightSA: number,
+  numLeft: number,
+  numRight: number,
+  costTraversal: number = 1.0,
+  costIntersection: number = 1.5
+): number {
+  if (parentSA <= 1e-6) {
+    return (numLeft + numRight) * costIntersection;
+  }
+  const probLeft = leftSA / parentSA;
+  const probRight = rightSA / parentSA;
+  return costTraversal + (probLeft * numLeft + probRight * numRight) * costIntersection;
+}
