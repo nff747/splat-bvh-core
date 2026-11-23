@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Splat Bvh Core Engine Configuration Manifest",
+  "type": "object",
+  "properties": {
+    "engine": { "type": "string", "const": "splat-bvh-core" },
+    "version": { "type": "string" },
+    "arenaBytes": { "type": "integer", "minimum": 1048576 },
+    "zeroAllocation": { "type": "boolean", "default": true }
+  },
+  "required": ["engine", "version"]
+}
